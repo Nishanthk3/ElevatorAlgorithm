@@ -4,62 +4,24 @@ import java.util.*;
 
 public class ElevatorAlgorithm {
 
-    public static void main(String args[]) throws InterruptedException {
-        int numOfElevators = 2;
-        int[] input = {5, 4, 9, 10, 7, 6, 3};
-        int[] dir = {0, 1, 0, 0, 1, 0, 0};
-        PriorityQueue<Integer> down = new PriorityQueue<>((a, b) -> b - a);
-        PriorityQueue<Integer> up = new PriorityQueue<>();
-        int[] elevators = new int[numOfElevators];
-        int[] servicingElevators = new int[numOfElevators];
+    static int numOfElevators = 2;
+    static int numberOfTimesButtonPresses = 4;
+//    int[] input = {5, 4, 9, 10, 7, 6, 3};
+//    int[] dir = {0, 1, 0, 0, 1, 0, 0};
+    static PriorityQueue<Integer> down = new PriorityQueue<>((a, b) -> b - a);
+    static PriorityQueue<Integer> up = new PriorityQueue<>();
+    static int[] elevators = new int[numOfElevators];
+    static int[] servicingElevators = new int[numOfElevators];
 
-        // Number of threads here equals number of elevators
+    public static void main(String args[]) throws InterruptedException {
+
+        // One thread for processing UP requests and another to process Down requests
         Runnable runnable1 = new Runnable() {
             @Override
             public void run() {
                 Random random = new Random();
                 while (true) {
-                    while (!down.isEmpty()) {
-                        //find Elevator
-                        if (Math.abs(down.peek() - elevators[0]) < Math.abs(down.peek() - elevators[1]) && servicingElevators[0] == 0) {
-                            // use elevator 0
-                            System.out.println("Going Down Elevator 0 At: " + elevators[0]);
-                            servicingElevators[0] = 1;
-                            while (!down.isEmpty()) {
-                                int v = down.poll();
-                                System.out.println("Going Down Serviced by Elevator 0 and now at floor:" + v);
-                                elevators[0] = v;
-                            }
-                            servicingElevators[0] = 0;
-                        } else if (servicingElevators[1] == 0) {
-                            // use elevator 1
-                            servicingElevators[1] = 1;
-                            System.out.println("Going Down Elevator 1 At: " + elevators[1]);
-                            while (!down.isEmpty()) {
-                                int v = down.poll();
-                                System.out.println("Going Down Serviced by Elevator 1 and now at floor:" + v);
-                                elevators[1] = v;
-                            }
-                            servicingElevators[1] = 0;
-                        }
-                    }
-                    floorButtonPress(random);
-                }
-            }
-
-            private void floorButtonPress(Random random) {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                Set<Integer> set = new HashSet<>();
-                while (set.size() != 4) {
-                    int d = random.nextInt(10) + 1;
-                    set.add(d);
-                }
-                for (int v : set) {
-                    down.offer(v);
+                    runElevators(down, random, "DOWN");
                 }
             }
         };
@@ -68,49 +30,8 @@ public class ElevatorAlgorithm {
             @Override
             public void run() {
                 Random random = new Random();
-
                 while (true) {
-                    while (!up.isEmpty()) {
-                        //find elevator
-                        if (Math.abs(up.peek() - elevators[0]) < Math.abs(up.peek() - elevators[1]) && servicingElevators[0] == 0) {
-                            // use elevator 0
-                            System.out.println("Going Up Elevator 0 At: " + elevators[0]);
-                            servicingElevators[0] = 1;
-                            while (!up.isEmpty()) {
-                                int v = up.poll();
-                                System.out.println("Going Up Serviced by Elevator 0 and now at floor:" + v);
-                                elevators[0] = v;
-                            }
-                            servicingElevators[0] = 0;
-                        } else if (servicingElevators[1] == 0) {
-                            // use elevator 1
-                            System.out.println("Going Up Elevator 1 At: " + elevators[1]);
-                            servicingElevators[1] = 1;
-                            while (!up.isEmpty()) {
-                                int v = up.poll();
-                                System.out.println("Going Up Serviced by Elevator 1 and now at floor:" + v);
-                                elevators[1] = v;
-                            }
-                            servicingElevators[1] = 0;
-                        }
-                    }
-                    floorButtonPress(random);
-                }
-            }
-
-            private void floorButtonPress(Random random) {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                Set<Integer> set = new HashSet<>();
-                while (set.size() != 4) {
-                    int d = random.nextInt(10) + 1;
-                    set.add(d);
-                }
-                for (int v : set) {
-                    up.offer(v);
+                    runElevators(up, random, "UP");
                 }
             }
         };
@@ -121,5 +42,49 @@ public class ElevatorAlgorithm {
         t1.start();
         t2.start();
 
+    }
+
+    private static void runElevators(PriorityQueue<Integer> queue, Random random, String dir) {
+        while (!queue.isEmpty()) {
+            //find elevator
+            if (Math.abs(queue.peek() - elevators[0]) < Math.abs(queue.peek() - elevators[1]) && servicingElevators[0] == 0) {
+                // use elevator 0
+                System.out.println("Going " + dir + " Elevator 0 At: " + elevators[0]);
+                servicingElevators[0] = 1;
+                while (!queue.isEmpty()) {
+                    int v = queue.poll();
+                    System.out.println("Going " + dir + " Serviced by Elevator 0 and now at floor:" + v);
+                    elevators[0] = v;
+                }
+                servicingElevators[0] = 0;
+            } else if (servicingElevators[1] == 0) {
+                // use elevator 1
+                System.out.println("Going " + dir + " Elevator 1 At: " + elevators[1]);
+                servicingElevators[1] = 1;
+                while (!queue.isEmpty()) {
+                    int v = queue.poll();
+                    System.out.println("Going  " + dir + "  Serviced by Elevator 1 and now at floor:" + v);
+                    elevators[1] = v;
+                }
+                servicingElevators[1] = 0;
+            }
+        }
+        floorButtonPress(queue, random);
+    }
+
+    private static void floorButtonPress(PriorityQueue<Integer> queue, Random random) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        Set<Integer> set = new HashSet<>();
+        while (set.size() != numberOfTimesButtonPresses) {
+            int d = random.nextInt(10) + 1;
+            set.add(d);
+        }
+        for (int v : set) {
+            queue.offer(v);
+        }
     }
 }
