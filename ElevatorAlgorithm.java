@@ -6,6 +6,7 @@ public class ElevatorAlgorithm {
 
     static int numOfElevators = 2;
     static int numberOfTimesButtonPresses = 4;
+// test change
 //    int[] input = {5, 4, 9, 10, 7, 6, 3};
 //    int[] dir = {0, 1, 0, 0, 1, 0, 0};
     static PriorityQueue<Integer> down = new PriorityQueue<>((a, b) -> b - a);
